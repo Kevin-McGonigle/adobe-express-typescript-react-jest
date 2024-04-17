@@ -1,46 +1,49 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-const isEnvProduction = process.env.NODE_ENV === "production";
+const isEnvProduction = process.env.NODE_ENV === 'production';
 
+/** @type { import('webpack').Configuration } */
 module.exports = {
-    mode: isEnvProduction ? "production" : "development",
-    devtool: isEnvProduction ? "source-map" : "eval-source-map",
-    entry: "./src/index.tsx",
-    experiments: {
-        outputModule: true
-    },
-    output: {
-        path: path.resolve(__dirname, "dist"),
-        module: true,
-        filename: "index.js"
-    },
-    externalsType: "module",
-    externalsPresets: { web: true },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: "src/index.html",
-            scriptLoading: "module"
-        }),
-        new CopyWebpackPlugin({
-            patterns: [{ from: "src/*.json", to: "[name][ext]" }]
-        })
+  devtool: isEnvProduction ? 'source-map' : 'eval-source-map',
+  entry: './src/index.tsx',
+  experiments: {
+    outputModule: true,
+  },
+  externalsPresets: { web: true },
+  externalsType: 'module',
+  mode: isEnvProduction ? 'production' : 'development',
+  module: {
+    rules: [
+      {
+        exclude: /node_modules/,
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+      },
+      {
+        test: /(\.css)$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
+      },
     ],
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/
-            },
-            {
-                test: /(\.css)$/,
-                use: ["style-loader", "css-loader"]
-            }
-        ]
-    },
-    resolve: {
-        extensions: [".tsx", ".ts", ".js", ".css"]
-    }
+  },
+  output: {
+    filename: 'index.js',
+    module: true,
+    path: path.resolve(__dirname, 'dist'),
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'src/index.html',
+      scriptLoading: 'module',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ from: 'src/*.json', to: '[name][ext]' }],
+    }),
+  ],
+  resolve: {
+    extensions: ['.tsx', '.ts', '.jsx', '.js', '.css'],
+    plugins: [new TsconfigPathsPlugin()],
+  },
 };
